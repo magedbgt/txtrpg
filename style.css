@@ -1,0 +1,57 @@
+html {
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    scroll-behavior: smooth;
+}
+*, *:before, *:after {
+    -webkit-box-sizing: inherit;
+    box-sizing: inherit;
+}
+
+/* width */
+::-webkit-scrollbar {
+    width: 3px;
+  }
+  
+  /* Track */
+  ::-webkit-scrollbar-track {
+    background: #0f0f0f;;
+  }
+  
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    background: #202020;;
+  }
+  
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: #202020;
+  }
+
+html, body{
+    margin: 0;
+    padding: 0;
+}
+
+body, input, input::placeholder{
+    background-color: black;
+    color: greenyellow;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+input{
+    border: none;
+}
+
+.container{
+    width: 85%;
+    margin: 0 auto;
+    clear: both;
+}
+
+#game-text{
+    overflow-y: scroll;
+    max-height: 80vh;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
