@@ -1,98 +1,66 @@
-let items = {
-    sword:{
-        name: 'sword',
-        description: ' There is a <strong>sword</strong> on a rock.',
-        taken: false,
-        edible: false,
-        damage: 5, 
-        action: function(target){
-            if(target == undefined || target.dead){
-                gameTextUpdate('There\'s no enemy!');
-                return;
-            }
-            let hit = getRandomIntInclusive(this.damage-3, this.damage);
-            target.hp -= hit;
-            // console.log(hit);
-            gameTextUpdate('You damage the enemy by '+hit+' points!');
-            if(target.hp <=0){
-                gameTextUpdate('The '+target.name+' died!'); 
-                target.dead = true;
-                return;
-            }
-            target.action();
-        }
-    },
-    snack: {
-        name: 'snack',
-        description: ' There\'s a snack on the ground.',
-        taken: false,
-        edible: true,
-        eaten: false,
-        recover: 10,
-        action: function(){
-            hp += this.recover;
-            if(hp>maxHP){
-                hp = maxHP;
-            }
-            this.eaten = true;
-            let name = this.name;
-            updateInventory(name);
-            gameTextUpdate('The '+this.name+ 'was eaten and your HP was recovered by '+this.recover+' points!'); 
-        }
-    },
-    potion1: {
-        name: 'potion',
-        description: ' There\'s a blue potion buried.',
-        taken: true,
-        edible: true,
-        eaten: false,
-        recover: 5,
-        action: function(){
-            maxHP += this.recover;
-            this.eaten = true;
-            let name = this.name;
-            updateInventory(name);
-            gameTextUpdate('You drank the '+this.name+ ' and your max HP was increased by '+this.recover+' points!');
-        }
+//global variables
+let currentRoom = 'start';
+let backRoom = '';
+let inventory = [];
+let hp = 100;
+let maxHP = 100;
+let mp = 50;
+let maxMP = 50;
+let xp = 0;
+let level = 1;
+let charName = 'Adventurer';
+let saveGameState = 0;
+let screenName = 'start';
+let atk = 5;
+let atkm = 2;
+
+class enemy{
+    constructor(name, enemy_hp, type, xp, damage, range, strength, dead){
+        this.name = name;
+        this.strength = strength;
+        this.description = 'There\'s a '+this.name+ ' in the area. They seem '+this.strength;
+        this.hp = enemy_hp;
+        this.damage = damage;
+        this.type = type;
+        this.xp = xp;
+        this.range = range;
+        this.dead = dead;
     }
-};
+     action () {
+        let hit = getRandomIntInclusive(this.damage-this.range, this.damage);
 
+        hp -= hit; //global hp => char's hp
 
+        gameTextUpdate('The '+this.name+' hit you by '+hit+' points!');
 
-// let keys = Object.keys(items);
-// let taken = [];
+            if(hp<=0){
+                screenName = 'death';
+                showDescription(screenName);
+                return; 
+            }
+    }
 
-// for(let i = 0; i < keys.length; i++){
-//     if(items[keys[i]].taken){
-//         taken.push(items[keys[i]].name);
-//     }
-// }
+    set died (isDead){
+        this.dead = isDead;
+    }
 
-// console.log(keys);
-// console.log(taken);
-
-// string = 'take blue potion';
-// s1 = string.split(' ')[0];
-// s2 = string.split(' ')[1];
-// s3 = string.split(' ')[2];
-
-// console.log(s1);
-// console.log(s2);
-// console.log(s3);
-
-// string = 'blue_potion';
-// s1 = string.split('_')[0];
-// s2 = string.split('_')[1];
-
-// console.log(s1);
-// console.log(s2);
-
-let lala = ['a', 'b', 'c'];
-
-function testa(a){
-    for(let i = 0; i<a.length; i++){
-        console.log(a[i]);
+    get isDead (){
+        return this.dead;
     }
 }
 
-testa(lala);
+let targets = {
+    troll1: new enemy('Tiny Troll', 20 + parseInt(hp/3), 'forest', 2, parseInt(4+(atk/3)), 3, 'weak', false),
+    troll2: new enemy('Rock Troll', 4 + parseInt((atk)/(level/3)), 'forest', 20, parseInt(4+(atk/3)), 2, 'strong', false)
+}
+
+//console.log(targets.troll1.type);
+
+//let trolls = targets.filter(function(value){ return value.type == 'forest';});
+const trolls = Object.fromEntries(Object.entries(targets).filter(([key, value]) => value.type === 'forest'))
+ // filteredByValue = {V: 5} 
+
+//console.log(trolls);
+
+const aaa = Object.keys(trolls);
+console.log(aaa);

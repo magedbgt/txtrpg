@@ -14,6 +14,11 @@ let screenName = 'start';
 let atk = 5;
 let atkm = 2;
 
+//randomizing numbers
+function getRndInteger(min, max) {
+  return Math.floor(Math.random() * (max - min + 1) ) + min;
+}
+
 //preventing tags
 function sanitize(s) {
     return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
@@ -44,7 +49,18 @@ function getRandomIntInclusive(min, max) {
     inventory = inventory.filter(function(value){ return value != name;});
   }
 
+   //random target matches property
+   function spawnTarget(room){
+     //rooms[currentRoom].type;
+    const possibleTargets = Object.fromEntries(Object.entries(targets).filter(([key, value]) => value.type === room.type))
 
+    if(room.targetEnabled){
+      
+      const keys = Object.keys(possibleTargets);
+      const index = getRndInteger(0, keys.length);
+      room.target = possibleTargets[keys[index]];
+    }
+  }
 
 const newTarget = (id,name, description, dead, hp, damage, action) => {
     let newObj = {

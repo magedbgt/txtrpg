@@ -7,12 +7,11 @@ let items = {
         edible: false,
         damage: 5, 
         action: function(target){
-            if(target == undefined || target.dead){
+            if(target == undefined || target == null){
                 gameTextUpdate('There\'s no enemy!');
                 return;
             }
             let hit = getRandomIntInclusive(this.damage-3, this.damage)+parseInt(atk/2);
-            target.hp -= hit;
             itemAction(hit, target);
         }
     },
@@ -58,9 +57,8 @@ let items = {
                 gameTextUpdate('There\'s no enemy!');
                 return;
             }
-            let hit = getRandomIntInclusive(this.damage-5, this.damage)+atkm;
+            let hit = getRandomIntInclusive(this.damage-5, this.damage) + atkm;
             target.hp -= hit;
-            // console.log(hit);
             itemAction(hit, target);
         }
     }
@@ -71,12 +69,13 @@ function itemAction(hit, target){
     gameTextUpdate('You damage the enemy by '+hit+' points!');
     
     if(target.hp <=0){
-        gameTextUpdate('The '+target.name+' died!');
-        gameTextUpdate('You received '+target.xp+' xp!'); 
+        gameTextUpdate('The ' + target.name + ' died!');
+        gameTextUpdate('You received '+ target.xp +' xp!'); 
         target.dead = true;
         xp += target.xp;
-        if(xp >= 15*level){
-            level = level+1;
+        if(xp >= 15 * level){
+            xp = xp - level * 15;
+            level = level + 1;
         }
         return;
     }
@@ -84,46 +83,45 @@ function itemAction(hit, target){
 }
 
 //targets
-let targets = {
-    troll1: {
-        name: 'troll',
-        description: ' Suddenly, a troll jumps out and bites your leg!',
-        dead: false,
-        hp: 20+parseInt(hp/3),
-        damage: 4+(atk/3),
-        type: 'forest',
-        xp: 2,
-        action: function(){
-            let hit = getRandomIntInclusive(this.damage-3, this.damage);
-            hp -= hit;
-            gameTextUpdate('The troll hit you by '+hit+' points!');
-        }
-    },
-    troll2: {
-        name: 'troll',
-        description: ' There are some trolls roasting some mysterious meat. They haven\'t seen you yet and they seem strong. What do you do? ',
-        dead: false,
-        hp: (40+parseInt(hp/2)),
-        damage: 4+parseInt((atk)/(level/3)),
-        type: 'forest',
-        xp: 10,
-        action: function(){
-            let hit = getRandomIntInclusive(this.damage-2, this.damage);
-            targetAction(hit);
-        }
+class enemy{
+    constructor(attr){
+        this.name = attr.name;
+        this.strength = attr.strength;
+        this.description = 'There\'s a '+this.name+ ' in the area. They seem '+this.strength;
+        this.hp = attr.enemyHp;
+        this.damage = attr.damage;
+        this.type = attr.type;
+        this.xp = attr.xp;
+        this.range = attr.range;
+        this.dead = attr.dead;
+    }
+     action () {
+        let hit = getRandomIntInclusive(this.damage-this.range, this.damage);
+
+        hp -= hit; //global hp => char's hp
+
+        gameTextUpdate('The '+ this.name +' hit you by '+hit+' points!');
+
+            if(hp<=0){
+                screenName = 'death';
+                showDescription(screenName);
+                return; 
+            }
+    }
+
+    set died (isDead){
+        this.dead = isDead;
+    }
+
+    get isDead (){
+        return this.dead;
     }
 }
 
-//target action
-function targetAction(hit){
-    hp -= hit;
-    gameTextUpdate('The troll hit you by '+hit+' points!');
-    if(hp<=0){
-        screenName = 'death';
-        showDescription(screenName);
-        return;
-    }
-
+let targets = {
+    troll1: {name:'Tiny Troll', enemyHP: 20+parseInt(hp/3), type: 'forest', xp: 2, damage: parseInt(4+(atk/3)), range: 3, strength: 'weak', dead: false},
+    troll2: {name: 'Rock Troll', enemyHP: 4+parseInt((atk)/(level/3)), type: 'forest', xp: 20, damage: parseInt(4+(atk/3)), range: 2, strength: 'strong', dead: false},
+    troll3: {name:'Lava Troll', enemyHp: 999999, type: 'Lava', xp: 999, damage: 9999, range: 0, strength: 'pretty strong', dead: false}
 }
 
 let rooms = {
@@ -132,19 +130,19 @@ let rooms = {
         description: "You are in a dark, cold place and you see a light to <b>north</b>\
      and you hear the sound of running water to the <b>west</b>.",
         type: 'forest',
+        targetEnabled: false,
         directions: {
             north: "clearing1",
             west: "bridge1"
         },
         items: items.sword
-        
-
     },
     clearing1: {
         title: '<strong>Clearing</strong>',
         description: "You arrive to a clearing, you see a lighthouse to the <b>north</b>\
      and there is a strange smell coming from the <b>east</b>. Behind you, to the <b>south</b>, there\'s a dark, cold place.",
         type: 'forest',
+        targetEnabled: false,
         directions: {
             south: "start",
             north: "lighthouse",
@@ -157,6 +155,7 @@ let rooms = {
         description: "You arrive to the lighthouse and walk up to the door. A strange old lady\
      opens the door. There is a clearing to the <b>south</b>. What do you do? ",
         type: 'forest',
+        targetEnabled: true,
         directions: {
             south: "clearing1"
         }
@@ -165,16 +164,17 @@ let rooms = {
         title: '<strong>Trolls</strong>',
         description: "You come from the <b>west </b> and arrive to another clearing. ",
         type: 'forest',
+        targetEnabled: true,
         directions: {
             west: "clearing1"
         },
         items: items.staff,
-        target: targets.troll2
     },
     bridge1: {
         title: '<strong>River Bank</strong>',
         description: "You see a river and there is a bridge to the <b>west</b>. You came from that dark, cold place to the <b>south</b>.",
         type: 'forest',
+        targetEnabled: true,
         directions: {
             east: "start",
             west: "bridge2"
@@ -185,6 +185,7 @@ let rooms = {
         title: '<strong>Troll Brigde</strong>',
         description: "You are at the bridge, and the river bank you came from is to the <b>east</b>.",
         type: 'forest',
+        targetEnabled: true,
         directions: {
             east: "bridge1"
         },

@@ -58,7 +58,6 @@ function loadGame(){
     showDescription();
 }
 
-
 //help
 function showHelp(){
     // gameTextUpdate('Here are the possible commands:');
